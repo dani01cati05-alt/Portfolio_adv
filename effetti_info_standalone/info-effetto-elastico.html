@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Info overlay — testo elastico (standalone)</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Sfondo di esempio: sostituiscilo col contenuto reale della tua pagina */
+    body {
+        background-color: #000;
+        color: #fff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* === BOTTONE INFO (in alto a destra) ===
+       Sostituisci background-image con la tua icona, o rimuovila e stila
+       il bottone come preferisci (es. testo "INFO"). */
+    .info-toggle-btn {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: #ff0000;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 0;
+        z-index: 200002;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .info-toggle-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .info-toggle-btn.active {
+        transform: rotate(180deg);
+    }
+
+    /* === OVERLAY INFO CON TESTO ELASTICO === */
+    .info-stretch-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200000;
+        background: #000000;
+        color: #ff0000;
+        font-family: "Arial Narrow", Arial, sans-serif;
+        overflow: hidden;
+        touch-action: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease-in-out;
+    }
+
+    .info-stretch-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Contenitore mosso via JS (transform), al posto dello scroll nativo:
+       permette di interpolare lo scorrimento con inerzia morbida invece
+       che a scatti come lo scroll del mouse/trackpad. */
+    .stretch-scroll {
+        will-change: transform;
+    }
+
+    .stretch-spacer {
+        height: 90vh;
+    }
+
+    .stretch-bio {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .stretch-bio p {
+        font-weight: 800;
+        font-size: clamp(3rem, 10vw, 8.5rem);
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+    }
+
+    .stretch-bio .line {
+        display: block;
+        transform-origin: top;
+        will-change: transform;
+        /* Il margine sotto è dinamico (JS): a riposo è 0 (righe vicine tra
+           loro), si apre solo per la riga che si sta effettivamente
+           allungando. */
+    }
+
+    .stretch-bio .word {
+        display: inline-block;
+    }
+
+    @media (max-width: 767px) {
+        .info-toggle-btn {
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .stretch-bio {
+            padding: 0 1.2rem;
+        }
+
+        .stretch-bio p {
+            font-size: clamp(2rem, 9vw, 8.5rem);
+            line-height: 1.1;
+        }
+
+        .stretch-spacer {
+            height: 70vh;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <p>Contenuto della pagina (dietro l'overlay quando è chiuso)</p>
+
+    <button id="info-toggle-btn" class="info-toggle-btn" aria-label="Apri info"></button>
+
+    <div id="info-overlay" class="info-stretch-overlay">
+        <div class="stretch-scroll" id="stretch-scroll">
+            <div class="stretch-spacer"></div>
+            <div class="stretch-bio">
+                <p class="split-lines">Testo segnaposto: qui va inserita la descrizione del progetto, il brief e il processo creativo. Sostituisci questo testo con il contenuto definitivo.</p>
+            </div>
+            <div class="stretch-spacer"></div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const infoToggleBtn = document.getElementById('info-toggle-btn');
+    const infoOverlay = document.getElementById('info-overlay');
+    const stretchScroll = document.getElementById('stretch-scroll');
+
+    let infoScrollTarget = 0;
+    let infoScrollCurrent = 0;
+
+    infoToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const opening = !infoOverlay.classList.contains('active');
+        infoToggleBtn.classList.toggle('active');
+        infoOverlay.classList.toggle('active');
+
+        if (opening) {
+            infoScrollTarget = 0;
+            infoScrollCurrent = 0;
+            stretchScroll.style.transform = 'translateY(0px)';
+        }
+    });
+
+    infoOverlay.addEventListener('click', () => {
+        infoOverlay.classList.remove('active');
+        infoToggleBtn.classList.remove('active');
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (infoOverlay.classList.contains('active') && e.key === 'Escape') {
+            infoOverlay.classList.remove('active');
+            infoToggleBtn.classList.remove('active');
+        }
+    });
+
+    // Scroll virtuale del testo: niente scroll nativo del browser (a scatti),
+    // ma un target inseguito con inerzia morbida.
+    infoOverlay.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        infoScrollTarget += e.deltaY;
+    }, { passive: false });
+
+    let infoTouchStartY = 0;
+    let infoTouchStartScroll = 0;
+
+    infoOverlay.addEventListener('touchstart', (e) => {
+        infoTouchStartY = e.touches[0].clientY;
+        infoTouchStartScroll = infoScrollTarget;
+    }, { passive: true });
+
+    infoOverlay.addEventListener('touchmove', (e) => {
+        const deltaY = infoTouchStartY - e.touches[0].clientY;
+        infoScrollTarget = infoTouchStartScroll + deltaY * 1.5;
+    }, { passive: true });
+
+    // === EFFETTO TESTO ELASTICO NELL'OVERLAY INFO ===
+    (() => {
+        const MAX_STRETCH = 2.8;
+        const INFLUENCE_RATIO = 0.28;
+        const FOCAL_RATIO = 0.5;
+        const SCROLL_SMOOTHING = 0.08;
+        const STRETCH_SMOOTHING = 0.06; // leggermente più lenta dello scroll, per un effetto morbido
+
+        function smoothstep(t) {
+            return t * t * (3 - 2 * t);
+        }
+
+        function splitIntoLines(p) {
+            const text = p.textContent.trim();
+            const words = text.split(/\s+/);
+
+            p.innerHTML = words.map(w => `<span class="word">${w}</span>`).join(' ');
+            const wordEls = Array.from(p.querySelectorAll('.word'));
+
+            const lines = [];
+            let currentTop = null;
+            let currentLine = [];
+
+            wordEls.forEach(w => {
+                const top = w.offsetTop;
+                if (currentTop === null || Math.abs(top - currentTop) < 2) {
+                    currentLine.push(w);
+                    currentTop = top;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = [w];
+                    currentTop = top;
+                }
+            });
+            if (currentLine.length) lines.push(currentLine);
+
+            p.innerHTML = '';
+            lines.forEach(lineWords => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'line';
+                lineWords.forEach((w, i) => {
+                    lineDiv.appendChild(w);
+                    if (i < lineWords.length - 1) lineDiv.appendChild(document.createTextNode(' '));
+                });
+                p.appendChild(lineDiv);
+            });
+        }
+
+        let stretchLineEls = [];
+
+        function refreshStretchLines() {
+            document.querySelectorAll('.split-lines').forEach(splitIntoLines);
+            stretchLineEls = Array.from(document.querySelectorAll('.stretch-bio .line'));
+        }
+
+        refreshStretchLines();
+        window.addEventListener('resize', () => {
+            clearTimeout(window._infoResizeT);
+            window._infoResizeT = setTimeout(refreshStretchLines, 150);
+        });
+
+        function updateStretch() {
+            if (infoOverlay.classList.contains('active')) {
+                const maxScroll = Math.max(0, stretchScroll.scrollHeight - window.innerHeight);
+                infoScrollTarget = Math.max(0, Math.min(infoScrollTarget, maxScroll));
+                infoScrollCurrent += (infoScrollTarget - infoScrollCurrent) * SCROLL_SMOOTHING;
+                stretchScroll.style.transform = `translateY(${(-infoScrollCurrent).toFixed(1)}px)`;
+
+                const focalY = window.innerHeight * FOCAL_RATIO;
+                const range = window.innerHeight * INFLUENCE_RATIO;
+
+                // Ogni riga calcola il proprio stiramento in base alla propria
+                // distanza dalla linea immaginaria: è una funzione continua della
+                // posizione, quindi non c'è mai un passaggio di testimone brusco
+                // tra una riga e l'altra.
+                stretchLineEls.forEach(line => {
+                    const rect = line.getBoundingClientRect();
+                    const lineCenter = rect.top + rect.height / 2;
+                    const dist = Math.abs(lineCenter - focalY);
+
+                    const t = Math.max(0, 1 - dist / range);
+                    const eased = smoothstep(t);
+                    const targetStretch = 1 + eased * (MAX_STRETCH - 1);
+
+                    // Insegue il target con un filo di inerzia in più rispetto
+                    // allo scroll (già morbido): l'effetto resta agganciato
+                    // alla posizione ma con un tocco di ritardo fluido.
+                    if (line._currentStretch === undefined) line._currentStretch = 1;
+                    line._currentStretch += (targetStretch - line._currentStretch) * STRETCH_SMOOTHING;
+                    const stretch = line._currentStretch;
+
+                    // Ancorata in alto (transform-origin: top): la testa della
+                    // riga resta ferma, la parte bassa si allunga, come un
+                    // foglio che esce da una stampante prima che finisca di
+                    // stampare. Il margine è proporzionale allo stiramento
+                    // attuale (continuo, niente scatti): a riposo è 0.
+                    const naturalHeight = line.offsetHeight;
+                    const extra = naturalHeight * (stretch - 1);
+
+                    line.style.transform = `scaleY(${stretch.toFixed(3)})`;
+                    line.style.marginBottom = extra.toFixed(1) + 'px';
+                });
+            }
+
+            requestAnimationFrame(updateStretch);
+        }
+
+        updateStretch();
+    })();
+});
+</script>
+
+</body>
+</html>

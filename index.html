@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Portfolio 2026</title>
+    <meta name="description" content="lele.matic — archivio di progetti digitali e fisici, sperimentazione tridimensionale e design d'avanguardia.">
+    <link rel="stylesheet" href="style.css?v=4">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+</head>
+<body>
+
+<div id="datetime-header" class="datetime-header"></div>
+
+<button id="toggle-colors" class="toggle-btn" aria-label="Inverti colori"></button>
+
+<button id="toggle-info" class="info-btn" aria-label="Apri menu info"></button>
+
+<div id="info-dropdown" class="info-dropdown" aria-hidden="true">
+    <div class="info-content">
+        <h1 class="stretch-text info-title">GENERAL INFO</h1>
+        <p class="stretch-text info-para">LELE.MATIC</p>
+        <p class="stretch-text info-para"><a href="https://www.instagram.com/lele.matic?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" style="color: inherit; text-decoration: none;">IG @lele.matic</a></p>
+    </div>
+</div>
+
+    <section class="viewport">
+        <div class="wheel" id="wheel">
+            <div class="center-display" id="center-display">
+                <img id="active-bg-image" class="rotating-center-image" src="" alt="Progetto Attivo" style="display: none; opacity: 0;">
+                
+                <model-viewer 
+                    id="active-bg-model" 
+                    src="" 
+                    auto-rotate 
+                    interaction-prompt="none"
+                    camera-controls 
+                    disable-zoom 
+                    style="display: none; opacity: 0;">
+                </model-viewer>
+            </div>
+
+            <div class="wheel-item">
+                <a href="pepsi.html" class="wheel-content">
+                    <model-viewer src="models/can_pepsi-v1.glb" interaction-prompt="none"></model-viewer>
+                    <h3>Brief Pepsi</h3>
+                </a>
+            </div>
+
+            <div class="wheel-item">
+                <a href="santanna.html" class="wheel-content">
+                    <model-viewer src="models/bottle-v2.glb" interaction-prompt="none"></model-viewer>
+                    <h3>Brief Sant'Anna</h3>
+                </a>
+            </div>
+
+            <div class="wheel-item">
+                <a href="rummo.html" class="wheel-content">
+                    <model-viewer src="models/rummo_box-v1.glb" interaction-prompt="none"></model-viewer>
+                    <h3>Brief Rummo</h3>
+                </a>
+            </div>
+
+            <div class="wheel-item">
+                <a href="convivio.html" class="wheel-content">
+                    <model-viewer src="models/bottle_book-v3.glb" interaction-prompt="none"></model-viewer>
+                    <h3>Brief Convivio</h3>
+                </a>
+            </div>
+
+            <div class="wheel-item">
+                <a href="immagine.html" class="wheel-content">
+                    <model-viewer src="models/photoframe-v1.glb" interaction-prompt="none"></model-viewer>
+                    <h3>Brief La Costruzione del Significato</h3>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <div id="dynamic-title-container">
+        <h3 id="dynamic-title"></h3>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brief Sant'Anna</title>
+    <link rel="stylesheet" href="stylediagonale.css">
+</head>
+<body>
+
+<a href="index.html" class="back-link">
+    <img src="assets_button/faccia_rossa.png" class="back-button" alt="Indietro">
+</a>
+
+<button id="info-toggle-btn" class="info-toggle-btn" aria-label="Apri info"></button>
+
+<div id="info-overlay" class="info-stretch-overlay">
+    <div class="stretch-scroll" id="stretch-scroll">
+        <div class="stretch-spacer"></div>
+        <div class="stretch-bio">
+            <p class="split-lines">SANT'ANNA Campagna nazionale di Affissioni e Out of Home (OOH) realizzata per il lancio della nuova linea premium di acqua Naturale e Frizzante di Acqua Sant'Anna in bottiglie d’alluminio da 500 ml. Il progetto posiziona il nuovo pack come un'alternativa contemporanea, urbana e sostenibile alla plastica, parlando a un target giovane (18-35 anni) attento al design e all'ambiente. Attraverso un tono di voce essenziale e senza retorica green, la strategia visiva mette al centro la matericità dell'alluminio sviluppando un format modulare su tre soggetti (Naturale, Frizzante e istituzionale di gamma) uniti da un pay-off sintetico ad alto impatto.</p>
+        </div>
+        <div class="stretch-spacer"></div>
+    </div>
+</div>
+
+    <div class="scene3d">
+        <div class="gallery">
+            <div class="card" style="background-image: url('santanna/sant\'anna_es_1_karol_daniele_page-0001.jpg');"></div>
+            <div class="card" style="background-image: url('santanna/sant\'anna_es_1_karol_daniele_page-0002.jpg');"></div>
+            <div class="card" style="background-image: url('santanna/sant\'anna_es_1_karol_daniele_page-0003.jpg');"></div>
+            <div class="card" style="background-image: url('santanna/sant\'anna_es_1_karol_daniele_page-0004.jpg');"></div>
+            <div class="card" style="background-image: url('santanna/sant\'anna_es_1_karol_daniele_page-0005.jpg');"></div>
+        </div>
+    </div>
+
+    <div id="counter" class="counter">1 / 28</div>
+
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-nav lightbox-prev">&#10094;</div>
+        
+        <img id="lightbox-img" src="" alt="Foto">
+        
+        <div class="lightbox-nav lightbox-next">&#10095;</div>
+        
+        <div id="lightbox-counter" class="counter">1 / 28</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            const totalCards = cards.length;
+            
+            let scrollTarget = 0;
+            let scrollCurrent = 0;
+            
+            let isMobile = window.innerWidth < 768;
+            let baseSpacing = isMobile ? 25 : 40;  
+            let gapSize = isMobile ? 120 : 250;     
+            let activeZone = isMobile ? 30 : 45;   
+
+            window.addEventListener('resize', () => {
+                isMobile = window.innerWidth < 768;
+                baseSpacing = isMobile ? 25 : 40;
+                gapSize = isMobile ? 120 : 250;
+                activeZone = isMobile ? 30 : 45;
+            });
+
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const counterEl = document.getElementById('counter');
+            const lightboxCounterEl = document.getElementById('lightbox-counter');
+            const btnPrev = document.querySelector('.lightbox-prev');
+            const btnNext = document.querySelector('.lightbox-next');
+
+            let currentLightboxIndex = 0;
+
+            window.addEventListener('wheel', (e) => {
+                if (e.target.closest('.info-toggle-btn') || e.target.closest('#info-overlay')) return;
+                scrollTarget += e.deltaY * 0.4;
+            });
+
+            // Gestione Drag & Touch per scorrimento gallery
+            let isDraggingGallery = false;
+            let isPointerDown = false;
+            let startPointerY = 0;
+            let startScrollTarget = 0;
+
+            function handlePointerStart(clientY) {
+                isPointerDown = true;
+                isDraggingGallery = false;
+                startPointerY = clientY;
+                startScrollTarget = scrollTarget;
+            }
+
+            function handlePointerMove(clientY) {
+                if (!isPointerDown) return;
+                const deltaY = clientY - startPointerY;
+                if (Math.abs(deltaY) > 5) {
+                    isDraggingGallery = true;
+                }
+                scrollTarget = startScrollTarget - deltaY * 1.5;
+            }
+
+            function handlePointerEnd() {
+                isPointerDown = false;
+                if (isDraggingGallery) {
+                    setTimeout(() => {
+                        isDraggingGallery = false;
+                    }, 50);
+                }
+            }
+
+            window.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.back-link') || e.target.closest('.lightbox') || e.target.closest('.lightbox-nav') || e.target.closest('.info-toggle-btn') || e.target.closest('#info-overlay')) return;
+                handlePointerStart(e.clientY);
+            });
+            window.addEventListener('mousemove', (e) => {
+                handlePointerMove(e.clientY);
+            });
+            window.addEventListener('mouseup', handlePointerEnd);
+
+            window.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.back-link') || e.target.closest('.lightbox') || e.target.closest('.lightbox-nav') || e.target.closest('.info-toggle-btn') || e.target.closest('#info-overlay')) return;
+                handlePointerStart(e.touches[0].clientY);
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                handlePointerMove(e.touches[0].clientY);
+            }, { passive: true });
+            window.addEventListener('touchend', handlePointerEnd);
+
+            // Gestione Swipe sul Lightbox per dispositivi mobile
+            let lightboxStartX = 0;
+            let lightboxStartY = 0;
+
+            lightbox.addEventListener('touchstart', (e) => {
+                lightboxStartX = e.touches[0].clientX;
+                lightboxStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            lightbox.addEventListener('touchend', (e) => {
+                const diffX = e.changedTouches[0].clientX - lightboxStartX;
+                const diffY = e.changedTouches[0].clientY - lightboxStartY;
+                if (Math.abs(diffX) > 50 && Math.abs(diffY) < 100) {
+                    if (diffX > 0) {
+                        let newIndex = currentLightboxIndex - 1;
+                        if (newIndex < 0) newIndex = totalCards - 1;
+                        updateLightbox(newIndex);
+                    } else {
+                        let newIndex = currentLightboxIndex + 1;
+                        if (newIndex >= totalCards) newIndex = 0;
+                        updateLightbox(newIndex);
+                    }
+                }
+            }, { passive: true });
+
+            function updateLightbox(index) {
+                currentLightboxIndex = index;
+                const bgImage = cards[index].style.backgroundImage;
+                const url = bgImage.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+                
+                lightboxImg.src = url;
+                lightboxCounterEl.innerText = `${index + 1} / ${totalCards}`;
+            }
+
+            cards.forEach((card, index) => {
+                card.addEventListener('click', (e) => {
+                    if (isDraggingGallery) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    updateLightbox(index);
+                    lightbox.classList.add('active');
+                });
+            });
+
+            btnPrev.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                let newIndex = currentLightboxIndex - 1;
+                if (newIndex < 0) newIndex = totalCards - 1; 
+                updateLightbox(newIndex);
+            });
+
+            btnNext.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                let newIndex = currentLightboxIndex + 1;
+                if (newIndex >= totalCards) newIndex = 0; 
+                updateLightbox(newIndex);
+            });
+
+            lightboxImg.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            lightbox.addEventListener('click', () => {
+                lightbox.classList.remove('active');
+            });
+
+            const infoToggleBtn = document.getElementById('info-toggle-btn');
+            const infoOverlay = document.getElementById('info-overlay');
+
+            const stretchScroll = document.getElementById('stretch-scroll');
+            let infoScrollTarget = 0;
+            let infoScrollCurrent = 0;
+
+            infoToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const opening = !infoOverlay.classList.contains('active');
+                infoToggleBtn.classList.toggle('active');
+                infoOverlay.classList.toggle('active');
+
+                if (opening) {
+                    infoScrollTarget = 0;
+                    infoScrollCurrent = 0;
+                    stretchScroll.style.transform = 'translateY(0px)';
+                }
+            });
+
+            infoOverlay.addEventListener('click', () => {
+                infoOverlay.classList.remove('active');
+                infoToggleBtn.classList.remove('active');
+            });
+
+            // Scroll virtuale del testo: niente scroll nativo del browser (a scatti),
+            // ma un target inseguito con inerzia morbida, come il carosello 3D della gallery.
+            infoOverlay.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                infoScrollTarget += e.deltaY;
+            }, { passive: false });
+
+            let infoTouchStartY = 0;
+            let infoTouchStartScroll = 0;
+
+            infoOverlay.addEventListener('touchstart', (e) => {
+                infoTouchStartY = e.touches[0].clientY;
+                infoTouchStartScroll = infoScrollTarget;
+            }, { passive: true });
+
+            infoOverlay.addEventListener('touchmove', (e) => {
+                const deltaY = infoTouchStartY - e.touches[0].clientY;
+                infoScrollTarget = infoTouchStartScroll + deltaY * 1.5;
+            }, { passive: true });
+
+            // === EFFETTO TESTO ELASTICO NELL'OVERLAY INFO ===
+            (() => {
+                const MAX_STRETCH = 2.8;
+                const INFLUENCE_RATIO = 0.28;
+                const FOCAL_RATIO = 0.5;
+                const SCROLL_SMOOTHING = 0.08; // stessa inerzia usata per il carosello 3D
+                const STRETCH_SMOOTHING = 0.06; // leggermente più lenta dello scroll, per un effetto morbido
+
+                function smoothstep(t) {
+                    return t * t * (3 - 2 * t);
+                }
+
+                function splitIntoLines(p) {
+                    const text = p.textContent.trim();
+                    const words = text.split(/\s+/);
+
+                    p.innerHTML = words.map(w => `<span class="word">${w}</span>`).join(' ');
+                    const wordEls = Array.from(p.querySelectorAll('.word'));
+
+                    const lines = [];
+                    let currentTop = null;
+                    let currentLine = [];
+
+                    wordEls.forEach(w => {
+                        const top = w.offsetTop;
+                        if (currentTop === null || Math.abs(top - currentTop) < 2) {
+                            currentLine.push(w);
+                            currentTop = top;
+                        } else {
+                            lines.push(currentLine);
+                            currentLine = [w];
+                            currentTop = top;
+                        }
+                    });
+                    if (currentLine.length) lines.push(currentLine);
+
+                    p.innerHTML = '';
+                    lines.forEach(lineWords => {
+                        const lineDiv = document.createElement('div');
+                        lineDiv.className = 'line';
+                        lineWords.forEach((w, i) => {
+                            lineDiv.appendChild(w);
+                            if (i < lineWords.length - 1) lineDiv.appendChild(document.createTextNode(' '));
+                        });
+                        p.appendChild(lineDiv);
+                    });
+                }
+
+                let stretchLineEls = [];
+
+                function refreshStretchLines() {
+                    document.querySelectorAll('.split-lines').forEach(splitIntoLines);
+                    stretchLineEls = Array.from(document.querySelectorAll('.stretch-bio .line'));
+                }
+
+                refreshStretchLines();
+                window.addEventListener('resize', () => {
+                    clearTimeout(window._infoResizeT);
+                    window._infoResizeT = setTimeout(refreshStretchLines, 150);
+                });
+
+                function updateStretch() {
+                    if (infoOverlay.classList.contains('active')) {
+                        const maxScroll = Math.max(0, stretchScroll.scrollHeight - window.innerHeight);
+                        infoScrollTarget = Math.max(0, Math.min(infoScrollTarget, maxScroll));
+                        infoScrollCurrent += (infoScrollTarget - infoScrollCurrent) * SCROLL_SMOOTHING;
+                        stretchScroll.style.transform = `translateY(${(-infoScrollCurrent).toFixed(1)}px)`;
+
+                        const focalY = window.innerHeight * FOCAL_RATIO;
+                        const range = window.innerHeight * INFLUENCE_RATIO;
+
+                        // Ogni riga calcola il proprio stiramento in base alla propria
+                        // distanza dalla linea immaginaria: è una funzione continua della
+                        // posizione, quindi non c'è mai un passaggio di testimone brusco
+                        // tra una riga e l'altra (che causava lo scatto).
+                        stretchLineEls.forEach(line => {
+                            const rect = line.getBoundingClientRect();
+                            const lineCenter = rect.top + rect.height / 2;
+                            const dist = Math.abs(lineCenter - focalY);
+
+                            const t = Math.max(0, 1 - dist / range);
+                            const eased = smoothstep(t);
+                            const targetStretch = 1 + eased * (MAX_STRETCH - 1);
+
+                            // Insegue il target con un filo di inerzia in più rispetto allo
+                            // scroll (che è già morbido): l'effetto resta agganciato alla
+                            // posizione ma con un tocco di ritardo fluido, non istantaneo.
+                            if (line._currentStretch === undefined) line._currentStretch = 1;
+                            line._currentStretch += (targetStretch - line._currentStretch) * STRETCH_SMOOTHING;
+                            const stretch = line._currentStretch;
+
+                            // Ancorata in alto (transform-origin: top): la testa della riga
+                            // resta ferma, la parte bassa si allunga, come un foglio che
+                            // esce da una stampante prima che finisca di stampare.
+                            // Il margine è proporzionale allo stiramento attuale (continuo,
+                            // niente scatti): a riposo è 0, si apre solo quanto serve.
+                            const naturalHeight = line.offsetHeight;
+                            const extra = naturalHeight * (stretch - 1);
+
+                            line.style.transform = `scaleY(${stretch.toFixed(3)})`;
+                            line.style.marginBottom = extra.toFixed(1) + 'px';
+                        });
+                    }
+
+                    requestAnimationFrame(updateStretch);
+                }
+
+                updateStretch();
+            })();
+
+            window.addEventListener('keydown', (e) => {
+                if (infoOverlay.classList.contains('active') && e.key === 'Escape') {
+                    infoOverlay.classList.remove('active');
+                    infoToggleBtn.classList.remove('active');
+                    return;
+                }
+
+                if (!lightbox.classList.contains('active')) return;
+
+                if (e.key === 'Escape') {
+                    lightbox.classList.remove('active');
+                } else if (e.key === 'ArrowLeft') {
+                    let newIndex = currentLightboxIndex - 1;
+                    if (newIndex < 0) newIndex = totalCards - 1;
+                    updateLightbox(newIndex);
+                } else if (e.key === 'ArrowRight') {
+                    let newIndex = currentLightboxIndex + 1;
+                    if (newIndex >= totalCards) newIndex = 0;
+                    updateLightbox(newIndex);
+                }
+            });
+
+            function animate() {
+                scrollCurrent += (scrollTarget - scrollCurrent) * 0.08;
+                const loopLength = totalCards * baseSpacing;
+                
+                let closestDistance = Infinity;
+                let activeIndex = 0;
+
+                cards.forEach((card, index) => {
+                    let progress = (index * baseSpacing) - scrollCurrent;
+                    progress = ((progress % loopLength) + loopLength) % loopLength;
+                    let currentPos = progress - (loopLength / 2);
+
+                    if (Math.abs(currentPos) < closestDistance) {
+                        closestDistance = Math.abs(currentPos);
+                        activeIndex = index;
+                    }
+
+                    let gap = 0;
+                    if (currentPos > activeZone) {
+                        gap = gapSize; 
+                    } else if (currentPos < -activeZone) {
+                        gap = -gapSize; 
+                    } else {
+                        gap = (currentPos / activeZone) * gapSize;
+                    }
+
+                    let adjustedPos = currentPos + gap;
+                    
+                    let xMultiplier = isMobile ? 1.0 : 1.5;
+                    let yMultiplier = isMobile ? -0.5 : -0.75;
+                    let zMultiplier = isMobile ? -0.25 : -0.35;
+                    let centerThreshold = isMobile ? 120 : 200;
+                    let centerMultiplier = isMobile ? 0.5 : 0.8;
+
+                    let xOffset = adjustedPos * xMultiplier;   
+                    let yOffset = adjustedPos * yMultiplier;  
+                    let zOffset = adjustedPos * zMultiplier;  
+
+                    let distanceToCenter = Math.abs(currentPos);
+                    if (distanceToCenter < centerThreshold) {
+                        zOffset += (centerThreshold - distanceToCenter) * centerMultiplier; 
+                    }
+
+                    card.style.zIndex = Math.round(10000 - distanceToCenter);
+
+                    if (index === activeIndex) {
+                        card.classList.add('center-active');
+                    } else {
+                        card.classList.remove('center-active');
+                    }
+
+                    card.style.transform = "translate3d(" + xOffset + "px, " + yOffset + "px, " + zOffset + "px) rotateY(-25deg)";
+                    card.style.opacity = 1; 
+                });
+
+                counterEl.innerText = `${activeIndex + 1} / ${totalCards}`;
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        });
+    </script>
+</body>
+</html>

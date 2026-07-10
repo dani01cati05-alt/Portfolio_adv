@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Info overlay — mix-blend-mode:difference (standalone)</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Sfondo di esempio: sostituiscilo col contenuto reale della tua pagina.
+       L'effetto funziona meglio sopra immagini/contenuti chiari e scuri
+       misti, perché il testo si "inverte" a seconda di cosa ha sotto. */
+    body {
+        background-color: #000;
+        color: #fff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* === BOTTONE INFO (in alto a destra) ===
+       Sostituisci background-image con la tua icona, o rimuovila e stila
+       il bottone come preferisci (es. testo "INFO"). */
+    .info-toggle-btn {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: #ff0000;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 0;
+        z-index: 200002;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .info-toggle-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .info-toggle-btn.active {
+        transform: rotate(180deg);
+    }
+
+    /* === OVERLAY INFO: testo con mix-blend-mode:difference sopra il
+       contenuto della pagina === */
+    .info-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10vh 8vw;
+        opacity: 0;
+        pointer-events: none;
+        mix-blend-mode: difference;
+        transition: opacity 0.4s ease-in-out;
+    }
+
+    .info-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .info-overlay-inner {
+        max-width: 900px;
+        color: #ffffff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .info-overlay-inner h2 {
+        font-weight: 900;
+        font-size: clamp(2.2rem, 6vw, 4.5rem);
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+    }
+
+    .info-overlay-inner p {
+        font-weight: 700;
+        font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+        letter-spacing: 1px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 767px) {
+        .info-toggle-btn {
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .info-overlay-inner h2 {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <p>Contenuto della pagina (dietro l'overlay quando è chiuso)</p>
+
+    <button id="info-toggle-btn" class="info-toggle-btn" aria-label="Apri info"></button>
+
+    <div id="info-overlay" class="info-overlay">
+        <div class="info-overlay-inner">
+            <h2>Info Progetto</h2>
+            <p>Testo segnaposto: qui va inserita la descrizione del progetto, il brief e il processo creativo. Sostituisci questo testo con il contenuto definitivo.</p>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const infoToggleBtn = document.getElementById('info-toggle-btn');
+    const infoOverlay = document.getElementById('info-overlay');
+
+    infoToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        infoToggleBtn.classList.toggle('active');
+        infoOverlay.classList.toggle('active');
+    });
+
+    infoOverlay.addEventListener('click', () => {
+        infoOverlay.classList.remove('active');
+        infoToggleBtn.classList.remove('active');
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (infoOverlay.classList.contains('active') && e.key === 'Escape') {
+            infoOverlay.classList.remove('active');
+            infoToggleBtn.classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
